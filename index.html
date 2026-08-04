@@ -208,20 +208,57 @@
                 <span>⭐</span> <span class="star-count-field">0</span>
             </div>
         </div>
-    <!-- Блок сканирования -->
+       <!-- Блок сканирования -->
     <div class="card">
         <p class="card-title">Анализ продуктов</p>
         <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #cbd5e1;">
-            Нажмите кнопку, чтобы запустить сканирование продуктов через ИИ-камеру.
+            Нажмите кнопку ниже, чтобы активировать ИИ-анализатор прямо в чате с ботом.
         </p>
-        
         <div class="upload-actions">
-            <!-- Кнопка теперь вызывает родную камеру Telegram -->
-            <button class="btn" id="scan-btn">
-                📷 Включить ИИ-сканер
+            <!-- Кнопка, которая отправит команду боту -->
+            <button class="btn" id="start-scan-btn">
+                🔍 Активировать сканер в чате
             </button>
         </div>
     </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // Синхронизация имени
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const nameFields = document.querySelectorAll('.user-name-field');
+            nameFields.forEach(field => {
+                field.innerText = tg.initDataUnsafe.user.first_name;
+            });
+        }
+
+        // Переключение страниц
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            const eventTarget = window.event.currentTarget;
+            if (eventTarget) { eventTarget.classList.add('active'); }
+        }
+
+        // Кнопка подписки
+        document.getElementById('sub-btn').addEventListener('click', () => {
+            tg.showPopup({
+                title: 'Переход на Premium',
+                message: 'Активируйте подписку для расширения лимита до 6 генераций в сутки. Оплата через Telegram Stars.',
+                buttons: [{id: 'ok', type: 'default', text: 'Продолжить'}]
+            });
+        });
+
+        // ЛОГИКА КНОПКИ: отправляем команду боту и закрываем приложение
+        document.getElementById('start-scan-btn').addEventListener('click', () => {
+            tg.sendData("🚀_START_SCANNING_");
+            tg.close();
+        });
+    </script>
 
 
     <!-- Вкладка 2: Профиль -->
