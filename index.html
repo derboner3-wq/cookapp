@@ -6,78 +6,23 @@
     <title>CookApp</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 16px;
-            color: #333;
-        }
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .balance {
-            font-size: 28px;
-            font-weight: bold;
-            color: #ff9800;
-        }
-        .limit {
-            font-size: 18px;
-            color: #666;
-        }
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            margin: 8px 0;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            background: #4CAF50;
-            color: white;
-            cursor: pointer;
-            transition: 0.2s;
-            text-align: center;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; margin: 0; padding: 16px; color: #333; }
+        .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .balance { font-size: 28px; font-weight: bold; color: #ff9800; }
+        .limit { font-size: 18px; color: #666; }
+        .btn { display: block; width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 12px; font-size: 18px; font-weight: 600; background: #4CAF50; color: white; cursor: pointer; transition: 0.2s; text-align: center; }
         .btn:active { transform: scale(0.96); }
         .btn-secondary { background: #2196F3; }
         .btn-warning { background: #ff9800; }
         .btn-danger { background: #f44336; }
-        .btn-outline {
-            background: transparent;
-            color: #333;
-            border: 2px solid #ddd;
-        }
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-        .stats span {
-            background: #eee;
-            padding: 8px 14px;
-            border-radius: 30px;
-            font-size: 14px;
-        }
+        .btn-outline { background: transparent; color: #333; border: 2px solid #ddd; }
     </style>
 </head>
 <body>
-
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <div style="font-size: 14px; color: #888;">Ваш баланс</div>
-                <div class="balance" id="balance">0 ⭐</div>
-            </div>
-            <div>
-                <div style="font-size: 14px; color: #888;">Лимит сегодня</div>
-                <div class="limit" id="limit">0 / 3</div>
-            </div>
+            <div><div style="font-size:14px;color:#888;">Баланс</div><div class="balance" id="balance">0 ⭐</div></div>
+            <div><div style="font-size:14px;color:#888;">Лимит сегодня</div><div class="limit" id="limit">0 / 3</div></div>
         </div>
     </div>
 
@@ -87,68 +32,24 @@
     <button class="btn btn-danger" id="subscribeBtn">📈 Подписка</button>
     <button class="btn btn-outline" id="historyBtn">📋 Мои рецепты</button>
 
-    <div class="card" style="margin-top: 20px; font-size: 14px; color: #999; text-align: center;">
-        <p>CookApp v1.0 — готовьте и получайте звёзды!</p>
+    <div class="card" style="margin-top:20px;font-size:14px;color:#999;text-align:center;">
+        <p>CookApp — готовьте и получайте звёзды!</p>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand();  // на весь экран
+        tg.expand();
 
-        // Получаем данные пользователя (автоматически, если бот открыл WebApp)
-        const user = tg.initDataUnsafe.user;
-        if (user) {
-            document.getElementById('userName').innerText = user.first_name || 'Гость';
-        }
+        document.getElementById('fridgeBtn').onclick = () => tg.sendData('fridge_photo');
+        document.getElementById('cookedBtn').onclick = () => tg.sendData('cooked_photo');
+        document.getElementById('buyStarsBtn').onclick = () => tg.sendData('buy_stars');
+        document.getElementById('subscribeBtn').onclick = () => tg.sendData('subscribe');
+        document.getElementById('historyBtn').onclick = () => tg.sendData('my_recipes');
 
-        // Функция для обновления данных с сервера (ваш бот)
-        async function updateUI() {
-            // Здесь можно сделать запрос к вашему серверному API для получения баланса и лимита
-            // Но для демонстрации используем заглушку, которая будет вызывать метод бота
-            // Реально можно использовать tg.sendData и обрабатывать ответ в боте
-            tg.sendData('get_profile'); // бот должен ответить обновлением
-        }
-
-        // Обработчики кнопок — отправляем команды боту через sendData
-        document.getElementById('fridgeBtn').addEventListener('click', () => {
-            tg.sendData('fridge_photo');
-        });
-
-        document.getElementById('cookedBtn').addEventListener('click', () => {
-            tg.sendData('cooked_photo');
-        });
-
-        document.getElementById('buyStarsBtn').addEventListener('click', () => {
-            tg.sendData('buy_stars');
-        });
-
-        document.getElementById('subscribeBtn').addEventListener('click', () => {
-            tg.sendData('subscribe');
-        });
-
-        document.getElementById('historyBtn').addEventListener('click', () => {
-            tg.sendData('my_recipes');
-        });
-
-        // Получаем обновления от бота (если бот отправляет ответ на данные)
-        tg.onEvent('mainButtonClicked', () => {});
-        // Можно также использовать WebApp.sendData и затем ловить ответ через onEvent('popupClosed')
-
-        // Имитация обновления UI по данным из бота (вызовется после получения ответа)
-        // Для реальной работы нужно реализовать обмен через WebApp.sendData и обработку в боте
-        // и затем обновлять UI через window.Telegram.WebApp.postEvent
-
-        // Запрос данных при загрузке
-        updateUI();
-
-        // Пример получения данных через встроенный метод (не работает, просто для иллюстрации)
-        // В реальности вы будете использовать WebApp.sendData и обрабатывать ответ в боте,
-        // а затем обновлять DOM через JavaScript.
-        // Для демонстрации я добавлю функцию, которая будет вызвана из бота (например, через eval)
-        window.updateBalance = function(balance, limit, used) {
+        function updateUI(balance, used, limit) {
             document.getElementById('balance').innerText = balance + ' ⭐';
             document.getElementById('limit').innerText = used + ' / ' + limit;
-        };
+        }
     </script>
 </body>
 </html>
