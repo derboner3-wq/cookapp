@@ -3,411 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartChef AI</title>
-    <!-- Официальный скрипт Telegram Web App -->
-    <script src="https://telegram.org"></script>
+    <title>CookApp</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --bg-color: var(--tg-theme-bg-color, #0f172a);
-            --text-color: var(--tg-theme-text-color, #f8fafc);
-            --card-bg: var(--tg-theme-secondary-bg-color, rgba(30, 41, 59, 0.7));
-            --accent-color: #38bdf8;
-            --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%);
-            --nav-bg: var(--tg-theme-bg-color, #0f172a);
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f5f5;
             margin: 0;
-            padding: 16px 16px 80px 16px; /* Отступ снизу для меню */
-            -webkit-font-smoothing: antialiased;
+            padding: 16px;
+            color: #333;
         }
-
-        /* Управление страницами */
-        .page {
-            display: none;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .page.active {
-            display: flex;
-        }
-
-        /* Шапка профиля */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 4px;
-        }
-
-        .user-info h2 {
-            margin: 0;
-            font-size: 20px;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-        }
-
-        .user-info p {
-            margin: 4px 0 0 0;
-            font-size: 13px;
-            color: #94a3b8;
-        }
-
-        .balance-badge {
-            background: rgba(56, 189, 248, 0.1);
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--accent-color);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* Карточки */
         .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: white;
             border-radius: 16px;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-
-        .card-title {
-            margin: 0;
-            font-size: 14px;
-            font-weight: 600;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .balance {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff9800;
         }
-
-        /* Элементы профиля */
-        .profile-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        .limit {
+            font-size: 18px;
+            color: #666;
         }
-        .profile-row:last-child {
-            border-bottom: none;
-        }
-
-        /* Кнопки */
-        .upload-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
         .btn {
-            background: var(--accent-gradient);
-            color: #ffffff;
-            border: none;
+            display: block;
+            width: 100%;
             padding: 14px;
+            margin: 8px 0;
+            border: none;
             border-radius: 12px;
-            font-size: 15px;
+            font-size: 18px;
             font-weight: 600;
+            background: #4CAF50;
+            color: white;
             cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
+            transition: 0.2s;
             text-align: center;
         }
-
-        .btn:active { opacity: 0.9; }
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-color);
+        .btn:active { transform: scale(0.96); }
+        .btn-secondary { background: #2196F3; }
+        .btn-warning { background: #ff9800; }
+        .btn-danger { background: #f44336; }
+        .btn-outline {
+            background: transparent;
+            color: #333;
+            border: 2px solid #ddd;
         }
-
-        .hidden-input { display: none; }
-
-        /* Нижнее навигационное меню */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 64px;
-            background: var(--nav-bg);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        .stats {
             display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 1000;
-            padding-bottom: env(safe-area-inset-bottom); /* Поддержка челок айфонов */
+            justify-content: space-between;
+            margin-bottom: 12px;
         }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            color: #64748b;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: 500;
-            width: 33%;
-            height: 100%;
-            justify-content: center;
-        }
-
-        .nav-item-icon {
-            font-size: 20px;
-            transition: transform 0.2s ease;
-        }
-
-        .nav-item.active {
-            color: var(--accent-color);
-        }
-        
-        .nav-item.active .nav-item-icon {
-            transform: scale(1.1);
-        }
-
-        /* Список рецептов */
-        .recipe-item {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        .recipe-status {
-            width: 8px;
-            height: 8px;
-            background: #22c55e;
-            border-radius: 50%;
+        .stats span {
+            background: #eee;
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Вкладка 1: Главная (Сканер) -->
-    <div id="page-main" class="page active">
-        <div class="header">
-            <div class="user-info">
-                <h2 class="user-name-field">Пользователь</h2>
-                <p>Персональный ИИ-шеф</p>
-            </div>
-            <div class="balance-badge">
-                <span>⭐</span> <span class="star-count-field">0</span>
-            </div>
-        </div>
-       <!-- Блок сканирования -->
     <div class="card">
-        <p class="card-title">Анализ продуктов</p>
-        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #cbd5e1;">
-            Нажмите кнопку ниже, чтобы активировать ИИ-анализатор прямо в чате с ботом.
-        </p>
-        <div class="upload-actions">
-            <!-- Кнопка, которая отправит команду боту -->
-            <button class="btn" id="start-scan-btn">
-                🔍 Активировать сканер в чате
-            </button>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <div style="font-size: 14px; color: #888;">Ваш баланс</div>
+                <div class="balance" id="balance">0 ⭐</div>
+            </div>
+            <div>
+                <div style="font-size: 14px; color: #888;">Лимит сегодня</div>
+                <div class="limit" id="limit">0 / 3</div>
+            </div>
         </div>
     </div>
 
+    <button class="btn" id="fridgeBtn">📸 Фото холодильника</button>
+    <button class="btn btn-secondary" id="cookedBtn">🍳 Готовое блюдо</button>
+    <button class="btn btn-warning" id="buyStarsBtn">⭐ Купить звёзды</button>
+    <button class="btn btn-danger" id="subscribeBtn">📈 Подписка</button>
+    <button class="btn btn-outline" id="historyBtn">📋 Мои рецепты</button>
+
+    <div class="card" style="margin-top: 20px; font-size: 14px; color: #999; text-align: center;">
+        <p>CookApp v1.0 — готовьте и получайте звёзды!</p>
+    </div>
+
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+        let tg = window.Telegram.WebApp;
+        tg.expand();  // на весь экран
 
-        // Синхронизация имени
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            const nameFields = document.querySelectorAll('.user-name-field');
-            nameFields.forEach(field => {
-                field.innerText = tg.initDataUnsafe.user.first_name;
-            });
+        // Получаем данные пользователя (автоматически, если бот открыл WebApp)
+        const user = tg.initDataUnsafe.user;
+        if (user) {
+            document.getElementById('userName').innerText = user.first_name || 'Гость';
         }
 
-        // Переключение страниц
-        function switchPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`page-${pageId}`).classList.add('active');
-            const eventTarget = window.event.currentTarget;
-            if (eventTarget) { eventTarget.classList.add('active'); }
+        // Функция для обновления данных с сервера (ваш бот)
+        async function updateUI() {
+            // Здесь можно сделать запрос к вашему серверному API для получения баланса и лимита
+            // Но для демонстрации используем заглушку, которая будет вызывать метод бота
+            // Реально можно использовать tg.sendData и обрабатывать ответ в боте
+            tg.sendData('get_profile'); // бот должен ответить обновлением
         }
 
-        // Кнопка подписки
-        document.getElementById('sub-btn').addEventListener('click', () => {
-            tg.showPopup({
-                title: 'Переход на Premium',
-                message: 'Активируйте подписку для расширения лимита до 6 генераций в сутки. Оплата через Telegram Stars.',
-                buttons: [{id: 'ok', type: 'default', text: 'Продолжить'}]
-            });
+        // Обработчики кнопок — отправляем команды боту через sendData
+        document.getElementById('fridgeBtn').addEventListener('click', () => {
+            tg.sendData('fridge_photo');
         });
 
-        // ЛОГИКА КНОПКИ: отправляем команду боту и закрываем приложение
-        document.getElementById('start-scan-btn').addEventListener('click', () => {
-            tg.sendData("🚀_START_SCANNING_");
-            tg.close();
+        document.getElementById('cookedBtn').addEventListener('click', () => {
+            tg.sendData('cooked_photo');
         });
+
+        document.getElementById('buyStarsBtn').addEventListener('click', () => {
+            tg.sendData('buy_stars');
+        });
+
+        document.getElementById('subscribeBtn').addEventListener('click', () => {
+            tg.sendData('subscribe');
+        });
+
+        document.getElementById('historyBtn').addEventListener('click', () => {
+            tg.sendData('my_recipes');
+        });
+
+        // Получаем обновления от бота (если бот отправляет ответ на данные)
+        tg.onEvent('mainButtonClicked', () => {});
+        // Можно также использовать WebApp.sendData и затем ловить ответ через onEvent('popupClosed')
+
+        // Имитация обновления UI по данным из бота (вызовется после получения ответа)
+        // Для реальной работы нужно реализовать обмен через WebApp.sendData и обработку в боте
+        // и затем обновлять UI через window.Telegram.WebApp.postEvent
+
+        // Запрос данных при загрузке
+        updateUI();
+
+        // Пример получения данных через встроенный метод (не работает, просто для иллюстрации)
+        // В реальности вы будете использовать WebApp.sendData и обрабатывать ответ в боте,
+        // а затем обновлять DOM через JavaScript.
+        // Для демонстрации я добавлю функцию, которая будет вызвана из бота (например, через eval)
+        window.updateBalance = function(balance, limit, used) {
+            document.getElementById('balance').innerText = balance + ' ⭐';
+            document.getElementById('limit').innerText = used + ' / ' + limit;
+        };
     </script>
-
-
-    <!-- Вкладка 2: Профиль -->
-    <div id="page-profile" class="page">
-        <h2>Мой аккаунт</h2>
-        
-        <div class="card">
-            <p class="card-title">Статистика повара</p>
-            <div class="profile-row">
-                <span>Имя пользователя:</span>
-                <strong class="user-name-field">Пользователь</strong>
-            </div>
-            <div class="profile-row">
-                <span>Заработано звёзд:</span>
-                <strong style="color: var(--accent-color);">⭐ <span class="star-count-field">0</span></strong>
-            </div>
-            <div class="profile-row">
-                <span>Использовано лимитов:</span>
-                <strong id="limits-display">0 / 3</strong>
-            </div>
-        </div>
-
-        <div class="card">
-            <p class="card-title">Тарифный план</p>
-            <p style="margin: 0; font-size: 14px; color: #cbd5e1;">Увеличьте количество ежедневных генераций в 2 раза.</p>
-            <button class="btn" id="sub-btn">⚡ Активировать X2 подписку</button>
-        </div>
-    </div>
-
-    <!-- Вкладка 3: Мои Рецепты -->
-    <div id="page-recipes" class="page">
-        <h2>История рецептов</h2>
-        <p style="color: #94a3b8; font-size: 14px; margin: 0 0 8px 4px;">Здесь будут храниться блюда, которые вы приготовили.</p>
-        
-        <div class="card" style="gap: 16px;">
-            <div class="recipe-item">
-                <div class="recipe-status"></div>
-                <div>
-                    <div style="font-weight: 600; font-size: 15px;">Домашняя паста с томатами</div>
-                    <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Сложность: Средняя (+3 ⭐)</div>
-                </div>
-            </div>
-            <div class="recipe-item">
-                <div class="recipe-status"></div>
-                <div>
-                    <div style="font-weight: 600; font-size: 15px;">ИИ-Омлет с зеленью</div>
-                    <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Сложность: Легкая (+1 ⭐)</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Нижнее меню навигации -->
-    <nav class="nav-bar">
-        <button class="nav-item active" onclick="switchPage('main')">
-            <span class="nav-item-icon">📷</span>
-            <span>Сканер</span>
-        </button>
-        <button class="nav-item" onclick="switchPage('recipes')">
-            <span class="nav-item-icon">📖</span>
-            <span>Рецепты</span>
-        </button>
-        <button class="nav-item" onclick="switchPage('profile')">
-            <span class="nav-item-icon">👤</span>
-            <span>Профиль</span>
-        </button>
-    </nav>
-
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
-
-        // Синхронизация имени пользователя во всех местах приложения
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            const nameFields = document.querySelectorAll('.user-name-field');
-            nameFields.forEach(field => {
-                field.innerText = tg.initDataUnsafe.user.first_name;
-            });
-        }
-
-        // Функция переключения вкладок
-        function switchPage(pageId) {
-            // Скрываем все страницы и убираем активный класс у кнопок
-            <script>
-    const tg = window.Telegram.WebApp;
-    tg.expand(); // Разворачиваем приложение на весь экран
-    tg.ready();
-
-    // Синхронизация имени пользователя во всех местах приложения
-    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-        const nameFields = document.querySelectorAll('.user-name-field');
-        nameFields.forEach(field => {
-            field.innerText = tg.initDataUnsafe.user.first_name;
-        });
-    }
-
-    // Функция переключения вкладок
-    function switchPage(pageId) {
-        // Скрываем все страницы и убираем активный класс у кнопок меню
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-
-        // Показываем нужную страницу
-        document.getElementById(`page-${pageId}`).classList.add('active');
-        
-        // Подсвечиваем нужную кнопку меню
-        const eventTarget = window.event.currentTarget;
-        if (eventTarget) {
-            eventTarget.classList.add('active');
-        }
-    }
-
-    // Кнопка покупки подписки за Telegram Stars
-    document.getElementById('sub-btn').addEventListener('click', () => {
-        tg.showPopup({
-            title: 'Переход на Premium',
-            message: 'Активируйте подписку для расширения лимита до 6 генераций в сутки. Оплата через Telegram Stars.',
-            buttons: [{id: 'ok', type: 'default', text: 'Продолжить'}]
-        });
-    });
-
-    // Функция обработки выбранных файлов (камера или галерея)
-    function handleFileSelection(event, sourceName) {
-        const file = event.target.files[0]; // Берем первый выбранный файл
-        if (file) {
-            tg.showPopup({
-                title: 'Изображение получено',
-                message: `Снимок загружен через ${sourceName}. Файл "${file.name}" готов к отправке ИИ-анализатору.`,
-                buttons: [
-                    {id: 'send', type: 'ok', text: 'Отправить на анализ'},
-                    {id: 'cancel', type: 'cancel', text: 'Отмена'}
-                ]
-            }, (buttonId) => {
-                // Если пользователь нажал кнопку "Отправить на анализ"
-                if (buttonId === 'send') {
-                    // Отправляем специальную команду нашему Python-боту обратно в чат!
-                    tg.sendData(`🚀_ANALYZE_IMAGE_:${file.name}`);
-                    
-                    // Закрываем мини-приложение, чтобы пользователь вернулся в диалог с ботом
-                    tg.close();
-                }
-            });
-        }
-    }
-
-    // Навешиваем слушатели на кнопки загрузки фото
-    document.getElementById('smart-upload').addEventListener('change', (e) => handleFileSelection(e, 'устройство'));
-    document.getElementById('gallery-only').addEventListener('change', (e) => handleFileSelection(e, 'галерею'));
-</script>
-
-            
+</body>
+</html>
