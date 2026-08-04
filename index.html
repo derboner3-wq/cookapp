@@ -208,21 +208,22 @@
                 <span>⭐</span> <span class="star-count-field">0</span>
             </div>
         </div>
-
-        <div class="card">
-            <p class="card-title">Анализ продуктов</p>
-            <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #cbd5e1;">
-                Загрузите фото продуктов или открытогольного холодильника. Нейросеть мгновенно составит персональные рецепты.
-            </p>
-            <div class="upload-actions">
-                <label for="camera-only" class="btn">📷 Сделать снимок</label>
-                <input type="file" accept="image/*" capture="camera" id="camera-only" class="hidden-input">
-
-                <label for="gallery-only" class="btn btn-secondary">📁 Добавить из галереи</label>
-                <input type="file" accept="image/*" id="gallery-only" class="hidden-input">
-            </div>
+         <!-- Блок сканирования -->
+    <div class="card">
+        <p class="card-title">Анализ продуктов</p>
+        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #cbd5e1;">
+            Загрузите фото продуктов или открытого холодильника. Нейросеть мгновенно составит персональные рецепты.
+        </p>
+        
+        <div class="upload-actions">
+            <!-- Универсальная кнопка, которая вызовет системное меню с рабочей Камерой и Галереей -->
+            <label for="smart-upload" class="btn">
+                📷 Сканировать продукты
+            </label>
+            <input type="file" accept="image/*" id="smart-upload" class="hidden-input">
         </div>
     </div>
+
 
     <!-- Вкладка 2: Профиль -->
     <div id="page-profile" class="page">
@@ -369,7 +370,7 @@
     }
 
     // Навешиваем слушатели на кнопки загрузки фото
-    document.getElementById('camera-only').addEventListener('change', (e) => handleFileSelection(e, 'камеру'));
+    document.getElementById('smart-upload').addEventListener('change', (e) => handleFileSelection(e, 'устройство'));
     document.getElementById('gallery-only').addEventListener('change', (e) => handleFileSelection(e, 'галерею'));
 </script>
 
