@@ -11,8 +11,9 @@
             --bg-color: var(--tg-theme-bg-color, #0f172a);
             --text-color: var(--tg-theme-text-color, #f8fafc);
             --card-bg: var(--tg-theme-secondary-bg-color, rgba(30, 41, 59, 0.7));
-            --accent-color: #38bdf8; /* Технологичный голубой */
+            --accent-color: #38bdf8;
             --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%);
+            --nav-bg: var(--tg-theme-bg-color, #0f172a);
         }
 
         body {
@@ -20,11 +21,19 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 16px;
-            display: flex;
+            padding: 16px 16px 80px 16px; /* Отступ снизу для меню */
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Управление страницами */
+        .page {
+            display: none;
             flex-direction: column;
             gap: 16px;
-            -webkit-font-smoothing: antialiased;
+        }
+
+        .page.active {
+            display: flex;
         }
 
         /* Шапка профиля */
@@ -76,34 +85,32 @@
 
         .card-title {
             margin: 0;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        /* Индикатор лимитов */
-        .limit-container {
+        /* Элементы профиля */
+        .profile-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .profile-row:last-child {
+            border-bottom: none;
         }
 
-        .limit-number {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -1px;
-        }
-
-        /* Блок кнопок загрузки */
+        /* Кнопки */
         .upload-actions {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
 
-        /* Кнопки */
         .btn {
             background: var(--accent-gradient);
             color: #ffffff;
@@ -113,7 +120,6 @@
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s ease;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -121,109 +127,250 @@
             text-align: center;
         }
 
-        .btn:active {
-            opacity: 0.9;
-        }
-
+        .btn:active { opacity: 0.9; }
         .btn-secondary {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: var(--text-color);
         }
 
-        /* Скрытые инпуты */
-        .hidden-input {
-            display: none;
+        .hidden-input { display: none; }
+
+        /* Нижнее навигационное меню */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--nav-bg);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom); /* Поддержка челок айфонов */
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #64748b;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            width: 33%;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .nav-item-icon {
+            font-size: 20px;
+            transition: transform 0.2s ease;
+        }
+
+        .nav-item.active {
+            color: var(--accent-color);
+        }
+        
+        .nav-item.active .nav-item-icon {
+            transform: scale(1.1);
+        }
+
+        /* Список рецептов */
+        .recipe-item {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .recipe-status {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
         }
     </style>
 </head>
 <body>
 
-    <!-- Блок профиля -->
-    <div class="header">
-        <div class="user-info">
-            <h2 id="username">Пользователь</h2>
-            <p>Персональный ИИ-шеф</p>
+    <!-- Вкладка 1: Главная (Сканер) -->
+    <div id="page-main" class="page active">
+        <div class="header">
+            <div class="user-info">
+                <h2 class="user-name-field">Пользователь</h2>
+                <p>Персональный ИИ-шеф</p>
+            </div>
+            <div class="balance-badge">
+                <span>⭐</span> <span class="star-count-field">0</span>
+            </div>
         </div>
-        <div class="balance-badge">
-            <span>⭐</span> <span id="star-count">0</span>
+
+        <div class="card">
+            <p class="card-title">Анализ продуктов</p>
+            <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #cbd5e1;">
+                Загрузите фото продуктов или открытогольного холодильника. Нейросеть мгновенно составит персональные рецепты.
+            </p>
+            <div class="upload-actions">
+                <label for="camera-only" class="btn">📷 Сделать снимок</label>
+                <input type="file" accept="image/*" capture="camera" id="camera-only" class="hidden-input">
+
+                <label for="gallery-only" class="btn btn-secondary">📁 Добавить из галереи</label>
+                <input type="file" accept="image/*" id="gallery-only" class="hidden-input">
+            </div>
         </div>
     </div>
 
-    <!-- Блок сканирования -->
-    <div class="card">
-        <p class="card-title">Анализ продуктов</p>
-        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #cbd5e1;">
-            Загрузите фото продуктов или открытого холодильника. Нейросеть мгновенно составит персональные рецепты.
-        </p>
+    <!-- Вкладка 2: Профиль -->
+    <div id="page-profile" class="page">
+        <h2>Мой аккаунт</h2>
         
-        <div class="upload-actions">
-            <!-- Кнопка 1: Только Камера -->
-            <label for="camera-only" class="btn">
-                📷 Сделать снимок
-            </label>
-            <input type="file" accept="image/*" capture="camera" id="camera-only" class="hidden-input">
+        <div class="card">
+            <p class="card-title">Статистика повара</p>
+            <div class="profile-row">
+                <span>Имя пользователя:</span>
+                <strong class="user-name-field">Пользователь</strong>
+            </div>
+            <div class="profile-row">
+                <span>Заработано звёзд:</span>
+                <strong style="color: var(--accent-color);">⭐ <span class="star-count-field">0</span></strong>
+            </div>
+            <div class="profile-row">
+                <span>Использовано лимитов:</span>
+                <strong id="limits-display">0 / 3</strong>
+            </div>
+        </div>
 
-            <!-- Кнопка 2: Только Галерея/Файлы -->
-            <label for="gallery-only" class="btn btn-secondary">
-                📁 Добавить из галереи
-            </label>
-            <input type="file" accept="image/*" id="gallery-only" class="hidden-input">
+        <div class="card">
+            <p class="card-title">Тарифный план</p>
+            <p style="margin: 0; font-size: 14px; color: #cbd5e1;">Увеличьте количество ежедневных генераций в 2 раза.</p>
+            <button class="btn" id="sub-btn">⚡ Активировать X2 подписку</button>
         </div>
     </div>
 
-    <!-- Блок лимитов и подписки -->
-    <div class="card">
-        <p class="card-title">Доступные генерации</p>
-        <div class="limit-container">
-            <div class="limit-number"><span id="limits-used">0</span> / <span id="limits-total">3</span></div>
-            <p style="margin: 0; font-size: 13px; color: #94a3b8; text-align: right;">Обновление каждые 24 часа</p>
+    <!-- Вкладка 3: Мои Рецепты -->
+    <div id="page-recipes" class="page">
+        <h2>История рецептов</h2>
+        <p style="color: #94a3b8; font-size: 14px; margin: 0 0 8px 4px;">Здесь будут храниться блюда, которые вы приготовили.</p>
+        
+        <div class="card" style="gap: 16px;">
+            <div class="recipe-item">
+                <div class="recipe-status"></div>
+                <div>
+                    <div style="font-weight: 600; font-size: 15px;">Домашняя паста с томатами</div>
+                    <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Сложность: Средняя (+3 ⭐)</div>
+                </div>
+            </div>
+            <div class="recipe-item">
+                <div class="recipe-status"></div>
+                <div>
+                    <div style="font-weight: 600; font-size: 15px;">ИИ-Омлет с зеленью</div>
+                    <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Сложность: Легкая (+1 ⭐)</div>
+                </div>
+            </div>
         </div>
-        <button class="btn btn-secondary" id="sub-btn">
-            ⚡ Увеличить лимит до 6 (X2 подписка)
+    </div>
+
+    <!-- Нижнее меню навигации -->
+    <nav class="nav-bar">
+        <button class="nav-item active" onclick="switchPage('main')">
+            <span class="nav-item-icon">📷</span>
+            <span>Сканер</span>
         </button>
-    </div>
+        <button class="nav-item" onclick="switchPage('recipes')">
+            <span class="nav-item-icon">📖</span>
+            <span>Рецепты</span>
+        </button>
+        <button class="nav-item" onclick="switchPage('profile')">
+            <span class="nav-item-icon">👤</span>
+            <span>Профиль</span>
+        </button>
+    </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
 
-        // Подтягиваем имя пользователя прямо из его Telegram-профиля
+        // Синхронизация имени пользователя во всех местах приложения
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
-        }
-
-        // Кнопка покупки подписки за Telegram Stars
-        document.getElementById('sub-btn').addEventListener('click', () => {
-            tg.showPopup({
-                title: 'Переход на Premium',
-                message: 'Активируйте подписку для расширения лимита до 6 генераций в сутки. Оплата через Telegram Stars.',
-                buttons: [{id: 'ok', type: 'default', text: 'Продолжить'}]
+            const nameFields = document.querySelectorAll('.user-name-field');
+            nameFields.forEach(field => {
+                field.innerText = tg.initDataUnsafe.user.first_name;
             });
-        });
-
-        // Функция обработки выбранного файла (одинаковая для камеры и галереи)
-        function handleFileSelection(event, sourceName) {
-            const file = event.target.files[0];
-            if (file) {
-                tg.showPopup({
-                    title: 'Изображение получено',
-                    message: `Снимок загружен через ${sourceName}. Файл "${file.name}" готов к отправке ИИ-анализатору.`,
-                    buttons: [{id: 'send', type: 'ok', text: 'Отправить на анализ'}]
-                });
-            }
         }
 
-        // Слушаем изменение инпута камеры
-        document.getElementById('camera-only').addEventListener('change', (e) => {
-            handleFileSelection(e, 'камеру');
-        });
+        // Функция переключения вкладок
+        function switchPage(pageId) {
+            // Скрываем все страницы и убираем активный класс у кнопок
+            <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Разворачиваем приложение на весь экран
+    tg.ready();
 
-        // Слушаем изменение инпута галереи
-        document.getElementById('gallery-only').addEventListener('change', (e) => {
-            handleFileSelection(e, 'галерею');
+    // Синхронизация имени пользователя во всех местах приложения
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        const nameFields = document.querySelectorAll('.user-name-field');
+        nameFields.forEach(field => {
+            field.innerText = tg.initDataUnsafe.user.first_name;
         });
-    </script>
-</body>
-</html>
+    }
+
+    // Функция переключения вкладок
+    function switchPage(pageId) {
+        // Скрываем все страницы и убираем активный класс у кнопок меню
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+
+        // Показываем нужную страницу
+        document.getElementById(`page-${pageId}`).classList.add('active');
+        
+        // Подсвечиваем нужную кнопку меню
+        const eventTarget = window.event.currentTarget;
+        if (eventTarget) {
+            eventTarget.classList.add('active');
+        }
+    }
+
+    // Кнопка покупки подписки за Telegram Stars
+    document.getElementById('sub-btn').addEventListener('click', () => {
+        tg.showPopup({
+            title: 'Переход на Premium',
+            message: 'Активируйте подписку для расширения лимита до 6 генераций в сутки. Оплата через Telegram Stars.',
+            buttons: [{id: 'ok', type: 'default', text: 'Продолжить'}]
+        });
+    });
+
+    // Функция обработки выбранных файлов (камера или галерея)
+    function handleFileSelection(event, sourceName) {
+        const file = event.target.files[0]; // Берем первый выбранный файл
+        if (file) {
+            tg.showPopup({
+                title: 'Изображение получено',
+                message: `Снимок загружен через ${sourceName}. Файл "${file.name}" готов к отправке ИИ-анализатору.`,
+                buttons: [
+                    {id: 'send', type: 'ok', text: 'Отправить на анализ'},
+                    {id: 'cancel', type: 'cancel', text: 'Отмена'}
+                ]
+            }, (buttonId) => {
+                // Если пользователь нажал кнопку "Отправить на анализ"
+                if (buttonId === 'send') {
+                    // Отправляем специальную команду нашему Python-боту обратно в чат!
+                    tg.sendData(`🚀_ANALYZE_IMAGE_:${file.name}`);
+                    
+                    // Закрываем мини-приложение, чтобы пользователь вернулся в диалог с ботом
+                    tg.close();
+                }
+            });
+        }
+    }
+
+    // Навешиваем слушатели на кнопки загрузки фото
+    document.getElementById('camera-only').addEventListener('change', (e) => handleFileSelection(e, 'камеру'));
+    document.getElementById('gallery-only').addEventListener('change', (e) => handleFileSelection(e, 'галерею'));
+</script>
+
+            
