@@ -3,82 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кулинарная Игра</title>
-    <!-- Подключаем официальный скрипт Telegram Mini Apps -->
+    <title>SmartChef AI</title>
+    <!-- Официальный скрипт Telegram Web App -->
     <script src="https://telegram.org"></script>
     <style>
+        :root {
+            --bg-color: var(--tg-theme-bg-color, #0f172a);
+            --text-color: var(--tg-theme-text-color, #f8fafc);
+            --card-bg: var(--tg-theme-secondary-bg-color, rgba(30, 41, 59, 0.7));
+            --accent-color: #38bdf8; /* Технологичный голубой */
+            --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%);
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #000000);
-            text-align: center;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            -webkit-font-smoothing: antialiased;
         }
+
+        /* Шапка профиля */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 4px;
+        }
+
+        .user-info h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .user-info p {
+            margin: 4px 0 0 0;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .balance-badge {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Карточки */
         .card {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
-        .btn {
-            background-color: var(--tg-theme-button-color, #2481cc);
-            color: var(--tg-theme-button-text-color, #ffffff);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
+
+        .card-title {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .stars {
+
+        /* Индикатор лимитов */
+        .limit-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .limit-number {
             font-size: 24px;
-            color: #ffca28;
-            font-weight: bold;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        /* Кнопки */
+        .btn {
+            background: var(--accent-gradient);
+            color: #ffffff;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            text-align: center;
+        }
+
+        .btn:active {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+        }
+
+        /* Скрытый инпут для вызова камеры телефона */
+        #camera-input {
+            display: none;
         }
     </style>
 </head>
 <body>
 
-    <h2>🍳 Кулинарная Арена</h2>
-    
-    <div class="card">
-        <p>Привет, <span id="username">Повар</span>!</p>
-        <div class="stars">⭐ <span id="star-count">0</span> звёзд</div>
+    <!-- Блок профиля -->
+    <div class="header">
+        <div class="user-info">
+            <h2 id="username">Пользователь</h2>
+            <p>Персональный ИИ-шеф</p>
+        </div>
+        <div class="balance-badge">
+            <span>⭐</span> <span id="star-count">0</span>
+        </div>
     </div>
 
+    <!-- Блок сканирования -->
     <div class="card">
-        <h3>📅 Твой лимит на сегодня:</h3>
-        <p><span id="limits">3 / 3</span> рецептов доступно</p>
-        <button class="btn" id="sub-btn" style="background-color: #e53935;">⚡ Оформить Х2 подписку (6 рецептов)</button>
+        <p class="card-title">Анализ продуктов</p>
+        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #cbd5e1;">
+            Сфотографируйте открытый холодильник. Нейросеть распознает ингредиенты и составит персональные рецепты.
+        </p>
+        <!-- Кнопка, открывающая системную камеру -->
+        <label for="camera-input" class="btn">
+            📷 Сканировать холодильник
+        </label>
+        <input type="file" accept="image/*" capture="camera" id="camera-input">
     </div>
 
+    <!-- Блок лимитов и подписки -->
     <div class="card">
-        <h3>📸 Начать готовку:</h3>
-        <p>Сфоткай холодильник, чтобы получить рецепт</p>
-        <button class="btn" id="photo-btn">📷 Сделать фото</button>
+        <p class="card-title">Доступные генерации</p>
+        <div class="limit-container">
+            <div class="limit-number"><span id="limits-used">0</span> / <span id="limits-total">3</span></div>
+            <p style="margin: 0; font-size: 13px; color: #94a3b8; text-align: right;">Обновление каждые 24 часа</p>
+        </div>
+        <button class="btn btn-secondary" id="sub-btn">
+            ⚡ Увеличить лимит до 6 (X2 подписка)
+        </button>
     </div>
 
     <script>
-        // Инициализируем Telegram Web App
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем приложение на весь экран
+        tg.expand(); // Разворачиваем на весь экран
+        tg.ready();
 
-        // Берем имя пользователя прямо из его Telegram-аккаунта!
+        // Подтягиваем имя пользователя прямо из его Telegram-профиля
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             document.getElementById('username').innerText = tg.initDataUnsafe.user.first_name;
         }
 
-        // Кнопка подписки (пока просто показывает уведомление)
+        // Кнопка покупки подписки за Telegram Stars
         document.getElementById('sub-btn').addEventListener('click', () => {
-            tg.showAlert('Тут будет оплата через Telegram Stars! Подписка умножит лимит на 2.');
+            tg.showPopup({
+                title: 'Переход на Premium',
+                message: 'Активируйте подписку для расширения лимита до 6 генераций в сутки. Оплата через Telegram Stars.',
+                buttons: [{id: 'ok', type: 'default', text: 'Продолжить'}]
+            });
         });
 
-        // Кнопка фото
-        document.getElementById('photo-btn').addEventListener('click', () => {
-            tg.showAlert('Здесь откроется камера для снимка холодильника.');
+        // Логика получения снимка с камеры телефона
+        const cameraInput = document.getElementById('camera-input');
+        cameraInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                tg.showPopup({
+                    title: 'Изображение получено',
+                    message: `Снимок "${file.name}" готов к отправке ИИ-анализатору.`,
+                    buttons: [{id: 'send', type: 'ok', text: 'Отправить на анализ'}]
+                });
+            }
         });
     </script>
 </body>
