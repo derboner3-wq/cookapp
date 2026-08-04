@@ -96,6 +96,13 @@
             letter-spacing: -1px;
         }
 
+        /* Блок кнопок загрузки */
+        .upload-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
         /* Кнопки */
         .btn {
             background: var(--accent-gradient);
@@ -124,8 +131,8 @@
             color: var(--text-color);
         }
 
-        /* Скрытый инпут для вызова камеры телефона */
-        #camera-input {
+        /* Скрытые инпуты */
+        .hidden-input {
             display: none;
         }
     </style>
@@ -147,13 +154,22 @@
     <div class="card">
         <p class="card-title">Анализ продуктов</p>
         <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #cbd5e1;">
-            Сфотографируйте открытый холодильник. Нейросеть распознает ингредиенты и составит персональные рецепты.
+            Загрузите фото продуктов или открытого холодильника. Нейросеть мгновенно составит персональные рецепты.
         </p>
-        <!-- Кнопка, открывающая системную камеру -->
-        <label for="camera-input" class="btn">
-            📷 Сканировать холодильник
-        </label>
-        <input type="file" accept="image/*" capture="camera" id="camera-input">
+        
+        <div class="upload-actions">
+            <!-- Кнопка 1: Только Камера -->
+            <label for="camera-only" class="btn">
+                📷 Сделать снимок
+            </label>
+            <input type="file" accept="image/*" capture="camera" id="camera-only" class="hidden-input">
+
+            <!-- Кнопка 2: Только Галерея/Файлы -->
+            <label for="gallery-only" class="btn btn-secondary">
+                📁 Добавить из галереи
+            </label>
+            <input type="file" accept="image/*" id="gallery-only" class="hidden-input">
+        </div>
     </div>
 
     <!-- Блок лимитов и подписки -->
@@ -170,7 +186,7 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем на весь экран
+        tg.expand();
         tg.ready();
 
         // Подтягиваем имя пользователя прямо из его Telegram-профиля
@@ -187,17 +203,26 @@
             });
         });
 
-        // Логика получения снимка с камеры телефона
-        const cameraInput = document.getElementById('camera-input');
-        cameraInput.addEventListener('change', (event) => {
+        // Функция обработки выбранного файла (одинаковая для камеры и галереи)
+        function handleFileSelection(event, sourceName) {
             const file = event.target.files[0];
             if (file) {
                 tg.showPopup({
                     title: 'Изображение получено',
-                    message: `Снимок "${file.name}" готов к отправке ИИ-анализатору.`,
+                    message: `Снимок загружен через ${sourceName}. Файл "${file.name}" готов к отправке ИИ-анализатору.`,
                     buttons: [{id: 'send', type: 'ok', text: 'Отправить на анализ'}]
                 });
             }
+        }
+
+        // Слушаем изменение инпута камеры
+        document.getElementById('camera-only').addEventListener('change', (e) => {
+            handleFileSelection(e, 'камеру');
+        });
+
+        // Слушаем изменение инпута галереи
+        document.getElementById('gallery-only').addEventListener('change', (e) => {
+            handleFileSelection(e, 'галерею');
         });
     </script>
 </body>
