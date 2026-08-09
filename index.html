@@ -24,52 +24,22 @@
             padding: 30px 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-        h1 {
-            font-size: 28px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .badge {
-            background: #ffcc00;
-            padding: 5px 12px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        .stars {
-            font-size: 24px;
-            color: #f5b342;
-            margin: 10px 0;
-        }
-        .limit {
-            font-size: 14px;
-            color: #888;
+        h1 { font-size: 28px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+        .badge { background: #ffcc00; padding: 5px 12px; border-radius: 30px; font-size: 14px; font-weight: 600; }
+        .stars { font-size: 24px; color: #f5b342; margin: 10px 0; }
+        .limit { font-size: 14px; color: #888; margin-bottom: 20px; }
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
             margin-bottom: 20px;
         }
-        .select-area {
-            margin: 20px 0;
-        }
-        .select-area select {
-            width: 100%;
-            padding: 15px;
-            font-size: 18px;
-            border: 2px solid #ddd;
-            border-radius: 15px;
-            background: white;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 20px;
-            cursor: pointer;
-        }
-        .select-area select:focus {
-            border-color: #f5b342;
-            outline: none;
-        }
+        .upload-area:hover { border-color: #f5b342; background: #fffbf0; }
+        .upload-area input { display: none; }
+        .upload-area img { max-width: 100%; max-height: 250px; border-radius: 15px; margin-top: 10px; }
         .btn {
             background: #f5b342;
             color: white;
@@ -92,11 +62,7 @@
             padding: 20px;
             display: none;
         }
-        .result .product-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
+        .result .product-title { font-size: 22px; font-weight: 700; margin-bottom: 15px; }
         .result .recipe {
             background: white;
             border-radius: 15px;
@@ -107,13 +73,31 @@
         .recipe h3 { margin-bottom: 5px; }
         .recipe p { color: #555; line-height: 1.4; }
         .error { color: #d32f2f; margin-top: 10px; }
-        .footer {
-            margin-top: 30px;
-            font-size: 13px;
-            color: #aaa;
-            text-align: center;
+        .footer { margin-top: 30px; font-size: 13px; color: #aaa; text-align: center; }
+        .manual-section {
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            display: none;
         }
-        .emoji-big { font-size: 40px; display: block; text-align: center; margin: 10px 0; }
+        .manual-section select {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            background: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 20px;
+            cursor: pointer;
+        }
+        .manual-section select:focus { border-color: #f5b342; outline: none; }
+        .manual-section .btn-manual {
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -122,20 +106,29 @@
     <div class="stars" id="starsDisplay">⭐ 0</div>
     <div class="limit">📸 Сегодня использовано: <span id="usedCount">0</span> / 3</div>
 
-    <div class="select-area">
-        <label style="font-weight:600; display:block; margin-bottom:8px;">Выберите продукт:</label>
-        <select id="productSelect">
+    <!-- Загрузка фото -->
+    <div class="upload-area" id="uploadArea">
+        <p>📸 Нажми, чтобы выбрать фото<br><small>или сфотографировать</small></p>
+        <input type="file" accept="image/*" capture="environment" id="photoInput">
+        <img id="preview" style="display:none;" />
+    </div>
+    <button class="btn" id="recognizeBtn" disabled>🔍 Распознать</button>
+
+    <!-- Ручной выбор (появляется при ошибке распознавания) -->
+    <div class="manual-section" id="manualSection">
+        <p style="color:#888; margin-bottom:10px;">⚠️ Распознавание не удалось. Выберите продукт вручную:</p>
+        <select id="manualProductSelect">
             <option value="">-- Выберите --</option>
             {% for p in products %}
                 <option value="{{ p }}">{{ p }}</option>
             {% endfor %}
         </select>
+        <button class="btn btn-manual" id="manualBtn">✅ Получить рецепты</button>
     </div>
 
-    <button class="btn" id="getRecipesBtn">🔍 Получить рецепты</button>
-
+    <!-- Результат -->
     <div class="result" id="resultBox">
-        <div class="product-title" id="productTitle">🍅 Помидор</div>
+        <div class="product-title" id="productTitle">🍽 ...</div>
         <div id="recipesContainer"></div>
     </div>
     <div id="errorMessage" class="error"></div>
@@ -143,28 +136,107 @@
 <div class="footer">CookApp — готовьте и получайте звёзды!</div>
 
 <script>
-    const productSelect = document.getElementById('productSelect');
-    const getBtn = document.getElementById('getRecipesBtn');
+    const photoInput = document.getElementById('photoInput');
+    const preview = document.getElementById('preview');
+    const uploadArea = document.getElementById('uploadArea');
+    const recognizeBtn = document.getElementById('recognizeBtn');
     const resultBox = document.getElementById('resultBox');
     const productTitle = document.getElementById('productTitle');
     const recipesContainer = document.getElementById('recipesContainer');
     const errorMsg = document.getElementById('errorMessage');
     const starsDisplay = document.getElementById('starsDisplay');
     const usedCount = document.getElementById('usedCount');
+    const manualSection = document.getElementById('manualSection');
+    const manualProductSelect = document.getElementById('manualProductSelect');
+    const manualBtn = document.getElementById('manualBtn');
 
-    getBtn.addEventListener('click', async () => {
-        const product = productSelect.value;
+    let currentImageBase64 = null;
+
+    // --- Загрузка фото ---
+    uploadArea.addEventListener('click', () => photoInput.click());
+    photoInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const dataUrl = ev.target.result;
+            preview.src = dataUrl;
+            preview.style.display = 'block';
+            currentImageBase64 = dataUrl.split(',')[1];
+            recognizeBtn.disabled = false;
+            errorMsg.textContent = '';
+            resultBox.style.display = 'none';
+            manualSection.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // --- Распознавание по фото ---
+    recognizeBtn.addEventListener('click', async () => {
+        if (!currentImageBase64) return;
+        recognizeBtn.disabled = true;
+        recognizeBtn.textContent = '⏳ Распознаю...';
+        errorMsg.textContent = '';
+        resultBox.style.display = 'none';
+        manualSection.style.display = 'none';
+
+        try {
+            const response = await fetch('/recognize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: currentImageBase64 })
+            });
+            const data = await response.json();
+
+            if (response.status === 429) {
+                errorMsg.textContent = '❌ ' + data.error;
+                return;
+            }
+            if (response.status === 404 && data.need_manual) {
+                // Показываем ручной выбор
+                manualSection.style.display = 'block';
+                errorMsg.textContent = '⚠️ ' + (data.error || 'Не удалось распознать, выберите вручную');
+                return;
+            }
+            if (!response.ok) {
+                errorMsg.textContent = '❌ Ошибка: ' + (data.error || 'Неизвестная ошибка');
+                return;
+            }
+
+            // Успех
+            productTitle.textContent = '🍽 ' + data.product;
+            recipesContainer.innerHTML = '';
+            data.recipes.forEach(r => {
+                const div = document.createElement('div');
+                div.className = 'recipe';
+                div.innerHTML = `<h3>${r.name}</h3><p>${r.instructions}</p>`;
+                recipesContainer.appendChild(div);
+            });
+            starsDisplay.textContent = '⭐ ' + data.stars;
+            usedCount.textContent = data.today_used;
+            resultBox.style.display = 'block';
+            manualSection.style.display = 'none';
+        } catch (err) {
+            errorMsg.textContent = '❌ Сетевая ошибка: ' + err.message;
+        } finally {
+            recognizeBtn.disabled = false;
+            recognizeBtn.textContent = '🔍 Распознать';
+        }
+    });
+
+    // --- Ручной выбор ---
+    manualBtn.addEventListener('click', async () => {
+        const product = manualProductSelect.value;
         if (!product) {
-            errorMsg.textContent = '⚠️ Выберите продукт из списка!';
+            errorMsg.textContent = '⚠️ Выберите продукт!';
             return;
         }
         errorMsg.textContent = '';
-        getBtn.disabled = true;
-        getBtn.textContent = '⏳ Загрузка...';
-        resultBox.style.display = 'none';
+        manualBtn.disabled = true;
+        manualBtn.textContent = '⏳ ...';
 
         try {
-            const response = await fetch('/get_recipes', {
+            const response = await fetch('/get_recipes_manual', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ product: product })
@@ -176,41 +248,29 @@
                 return;
             }
             if (!response.ok) {
-                errorMsg.textContent = '❌ Ошибка: ' + (data.error || 'Неизвестная ошибка');
+                errorMsg.textContent = '❌ ' + data.error;
                 return;
             }
 
-            // Обновляем звёзды и лимит
-            starsDisplay.textContent = '⭐ ' + data.stars;
-            usedCount.textContent = data.today_used;
-
-            // Показываем рецепты
             productTitle.textContent = '🍽 ' + data.product;
             recipesContainer.innerHTML = '';
-            if (data.recipes.length === 0) {
-                recipesContainer.innerHTML = '<p style="color:#888;">Нет рецептов для этого продукта</p>';
-            } else {
-                data.recipes.forEach(r => {
-                    const div = document.createElement('div');
-                    div.className = 'recipe';
-                    div.innerHTML = `<h3>${r.name}</h3><p>${r.instructions}</p>`;
-                    recipesContainer.appendChild(div);
-                });
-            }
+            data.recipes.forEach(r => {
+                const div = document.createElement('div');
+                div.className = 'recipe';
+                div.innerHTML = `<h3>${r.name}</h3><p>${r.instructions}</p>`;
+                recipesContainer.appendChild(div);
+            });
+            starsDisplay.textContent = '⭐ ' + data.stars;
+            usedCount.textContent = data.today_used;
             resultBox.style.display = 'block';
-
+            manualSection.style.display = 'none';
         } catch (err) {
-            errorMsg.textContent = '❌ Сетевая ошибка: ' + err.message;
+            errorMsg.textContent = '❌ Ошибка: ' + err.message;
         } finally {
-            getBtn.disabled = false;
-            getBtn.textContent = '🔍 Получить рецепты';
+            manualBtn.disabled = false;
+            manualBtn.textContent = '✅ Получить рецепты';
         }
     });
-
-    // Для демо: при загрузке выбираем случайный продукт (необязательно)
-    window.onload = function() {
-        // Можно оставить пустым
-    };
 </script>
 </body>
 </html>
