@@ -2,320 +2,298 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🛒 Умный список</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Кошелёк</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
+        :root {
+            --tg-theme-bg: #ffffff;
+            --tg-theme-text: #1a1a1a;
+            --tg-theme-hint: #8e8e93;
+            --tg-theme-link: #007aff;
+            --tg-theme-button: #007aff;
+            --tg-theme-button-text: #ffffff;
+            --tg-theme-secondary-bg: #f2f2f7;
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: #f5f3f0;
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg);
+            color: var(--tg-theme-text);
+            padding: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .header {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--tg-theme-secondary-bg);
+            display: flex;
+            align-items: center;
             justify-content: center;
+            font-size: 18px;
         }
-        .container {
-            max-width: 600px;
-            width: 100%;
-            background: white;
-            border-radius: 30px;
-            padding: 30px 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        .greeting {
+            font-size: 14px;
+            color: var(--tg-theme-hint);
         }
-        h1 {
-            font-size: 28px;
+        .balance-card {
+            background: linear-gradient(135deg, #007aff, #00c6ff);
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 24px;
+        }
+        .balance-label { font-size: 14px; opacity: 0.9; }
+        .balance-amount { font-size: 32px; font-weight: bold; margin-top: 4px; }
+        .balance-limit { font-size: 14px; opacity: 0.8; margin-top: 4px; }
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn:active { opacity: 0.8; }
+        .btn-primary {
+            background: var(--tg-theme-button);
+            color: var(--tg-theme-button-text);
+        }
+        .btn-secondary {
+            background: var(--tg-theme-secondary-bg);
+            color: var(--tg-theme-text);
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .transaction-list {
+            list-style: none;
+        }
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--tg-theme-secondary-bg);
+        }
+        .transaction-left {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        .input-row {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0 10px;
+        .transaction-emoji {
+            font-size: 24px;
         }
-        .input-row input {
-            flex: 1;
-            padding: 14px 18px;
-            border: 2px solid #ddd;
-            border-radius: 40px;
+        .transaction-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .transaction-category {
             font-size: 16px;
-            outline: none;
-            transition: 0.2s;
+            font-weight: 500;
         }
-        .input-row input:focus {
-            border-color: #f5b342;
-        }
-        .input-row button {
-            padding: 14px 24px;
-            background: #f5b342;
-            border: none;
-            border-radius: 40px;
-            font-size: 18px;
-            font-weight: 700;
-            color: white;
-            cursor: pointer;
-            transition: 0.2s;
-            white-space: nowrap;
-        }
-        .input-row button:active { transform: scale(0.96); }
-        .input-row button:disabled { opacity: 0.5; pointer-events: none; }
-
-        .cat-title {
-            font-weight: 700;
-            font-size: 18px;
-            margin: 20px 0 8px 0;
-            color: #555;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 6px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .cat-title span { font-weight: 400; font-size: 14px; color: #999; }
-
-        .item {
-            display: flex;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #f0edea;
-            cursor: pointer;
-        }
-        .item .name {
-            flex: 1;
-            font-size: 17px;
-            transition: 0.2s;
-        }
-        .item .name.done {
-            text-decoration: line-through;
-            color: #aaa;
-        }
-        .item .del {
-            color: #ccc;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 0 8px;
-            transition: 0.2s;
-            visibility: hidden;
-        }
-        .item:hover .del { visibility: visible; }
-        .item .del:hover { color: #d32f2f; }
-
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 25px;
-            gap: 10px;
-        }
-        .footer button {
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 14px;
-            cursor: pointer;
-            padding: 8px 16px;
-            border-radius: 30px;
-            background: #f0edea;
-            transition: 0.2s;
-        }
-        .footer button:hover { background: #e0dbd5; }
-        .footer button.danger { color: #d32f2f; }
-
-        .empty {
-            text-align: center;
-            color: #aaa;
-            padding: 40px 0;
-            font-size: 16px;
-        }
-        .hint {
+        .transaction-date {
             font-size: 13px;
-            color: #aaa;
-            margin-top: 4px;
-            margin-bottom: 10px;
+            color: var(--tg-theme-hint);
         }
-        a { text-decoration: none; }
+        .transaction-amount {
+            font-weight: 600;
+        }
+        .empty-state {
+            text-align: center;
+            color: var(--tg-theme-hint);
+            padding: 40px 0;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>🛒 Умный список</h1>
-
-    <div class="input-row">
-        <input type="text" id="productInput" placeholder="Продукт, например: яблоки, молоко" />
-        <button id="addBtn">➕</button>
-    </div>
-    <div class="hint">✏️ Можно добавлять несколько через запятую: <i>яблоки, молоко, хлеб</i></div>
-
-    <div id="listContainer">
-        <div class="empty">Список пуст. Добавьте продукты!</div>
+    <div class="header">
+        <div>
+            <div class="greeting">Привет,</div>
+            <div id="userName">...</div>
+        </div>
+        <div class="avatar" id="userAvatar">👤</div>
     </div>
 
-    <div class="footer">
-        <button id="clearDoneBtn">✅ Убрать купленные</button>
-        <button id="clearAllBtn" class="danger">🗑️ Очистить всё</button>
+    <div class="balance-card">
+        <div class="balance-label">Остаток на месяц</div>
+        <div class="balance-amount" id="balanceDisplay">0 ₽</div>
+        <div class="balance-limit" id="dailyLimit">Дневной лимит: не задан</div>
     </div>
-</div>
 
-<script>
-    // ----- Хранилище в localStorage -----
-    const STORAGE_KEY = 'smart_shopping_list';
+    <div class="actions">
+        <button class="btn btn-primary" id="addExpenseBtn">➖ Добавить расход</button>
+        <button class="btn btn-secondary" id="addIncomeBtn">➕ Добавить доход</button>
+    </div>
 
-    // Категории (для группировки)
-    const CATEGORIES = {
-        'овощи': ['помидор', 'огурец', 'морковь', 'капуста', 'лук', 'чеснок', 'перец', 'баклажан', 'кабачок', 'свекла', 'картофель'],
-        'фрукты': ['яблоко', 'банан', 'апельсин', 'лимон', 'груша', 'виноград', 'клубника', 'арбуз', 'дыня', 'персик'],
-        'мясо': ['говядина', 'свинина', 'курица', 'индейка', 'баранина', 'фарш', 'колбаса', 'сосиски'],
-        'рыба': ['лосось', 'треска', 'сельдь', 'скумбрия', 'карп', 'форель', 'креветка'],
-        'молочное': ['молоко', 'кефир', 'йогурт', 'творог', 'сыр', 'сметана', 'сливки', 'масло', 'ряженка'],
-        'хлеб': ['хлеб', 'батон', 'булка', 'лаваш', 'кекс', 'печенье'],
-        'бакалея': ['рис', 'гречка', 'макароны', 'мука', 'сахар', 'соль', 'масло', 'крупа', 'овсянка', 'горох', 'чечевица'],
-        'напитки': ['вода', 'сок', 'компот', 'чай', 'кофе', 'лимонад'],
-        'прочее': []
-    };
+    <div class="section-title">Последние операции</div>
+    <ul class="transaction-list" id="transactionList">
+        <li class="empty-state">Нет записей</li>
+    </ul>
 
-    function getCategory(product) {
-        const lower = product.toLowerCase();
-        for (const [cat, keywords] of Object.entries(CATEGORIES)) {
-            for (const kw of keywords) {
-                if (lower.includes(kw)) return cat;
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand(); // раскрыть на полный экран
+
+        // Применяем тему Telegram
+        document.documentElement.style.setProperty('--tg-theme-bg', tg.backgroundColor);
+        document.documentElement.style.setProperty('--tg-theme-text', tg.textColor);
+        document.documentElement.style.setProperty('--tg-theme-hint', tg.hintColor);
+        document.documentElement.style.setProperty('--tg-theme-link', tg.linkColor);
+        document.documentElement.style.setProperty('--tg-theme-button', tg.buttonColor);
+        document.documentElement.style.setProperty('--tg-theme-button-text', tg.buttonTextColor);
+        document.documentElement.style.setProperty('--tg-theme-secondary-bg', tg.secondaryBackgroundColor);
+
+        // Отображаем имя пользователя
+        const userName = tg.initDataUnsafe?.user?.first_name || 'Гость';
+        document.getElementById('userName').textContent = userName;
+        document.getElementById('userAvatar').textContent = userName.charAt(0).toUpperCase();
+
+        // Ключи для CloudStorage
+        const STORAGE_KEY_BALANCE = 'wallet_balance';
+        const STORAGE_KEY_TRANSACTIONS = 'wallet_transactions';
+
+        // Текущие данные в памяти
+        let balance = 0;
+        let transactions = [];
+
+        // Загрузка из облака
+        async function loadData() {
+            try {
+                const [savedBalance, savedTransactions] = await Promise.all([
+                    getCloudValue(STORAGE_KEY_BALANCE),
+                    getCloudValue(STORAGE_KEY_TRANSACTIONS)
+                ]);
+                if (savedBalance !== null) balance = Number(savedBalance);
+                if (savedTransactions) transactions = JSON.parse(savedTransactions);
+                updateUI();
+            } catch (e) {
+                console.error('Ошибка загрузки:', e);
+                updateUI(); // показать хотя бы дефолтные значения
             }
         }
-        return 'прочее';
-    }
 
-    // Загружаем список
-    function loadList() {
-        try {
-            const data = localStorage.getItem(STORAGE_KEY);
-            return data ? JSON.parse(data) : [];
-        } catch { return []; }
-    }
-
-    function saveList(items) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    }
-
-    function render() {
-        const container = document.getElementById('listContainer');
-        const items = loadList();
-        if (items.length === 0) {
-            container.innerHTML = '<div class="empty">Список пуст. Добавьте продукты!</div>';
-            return;
+        function getCloudValue(key) {
+            return new Promise((resolve) => {
+                tg.CloudStorage.getItem(key, (err, value) => {
+                    if (err) resolve(null);
+                    else resolve(value);
+                });
+            });
         }
 
-        // Группировка по категории
-        const groups = {};
-        items.forEach(item => {
-            const cat = item.category || 'прочее';
-            if (!groups[cat]) groups[cat] = [];
-            groups[cat].push(item);
-        });
+        function setCloudValue(key, value) {
+            return new Promise((resolve) => {
+                tg.CloudStorage.setItem(key, String(value), (err, success) => {
+                    if (err) console.error(err);
+                    resolve(success);
+                });
+            });
+        }
 
-        let html = '';
-        const emojiMap = {
-            'овощи': '🥬', 'фрукты': '🍎', 'мясо': '🥩', 'рыба': '🐟',
-            'молочное': '🧀', 'хлеб': '🍞', 'бакалея': '🍚', 'напитки': '🥤', 'прочее': '📦'
-        };
-        for (const [cat, itemsInCat] of Object.entries(groups)) {
-            const emoji = emojiMap[cat] || '📦';
-            const doneCount = itemsInCat.filter(i => i.done).length;
-            const total = itemsInCat.length;
-            html += `<div class="cat-title">${emoji} ${cat.charAt(0).toUpperCase()+cat.slice(1)} <span>${doneCount}/${total}</span></div>`;
-            itemsInCat.forEach(item => {
-                const doneClass = item.done ? 'done' : '';
-                html += `
-                    <div class="item" data-id="${item.id}">
-                        <span class="name ${doneClass}">${item.text}</span>
-                        <span class="del" data-id="${item.id}">✕</span>
+        // Сохранение всех данных
+        async function saveData() {
+            await Promise.all([
+                setCloudValue(STORAGE_KEY_BALANCE, balance),
+                setCloudValue(STORAGE_KEY_TRANSACTIONS, JSON.stringify(transactions))
+            ]);
+        }
+
+        // Добавление демо-расхода (потом заменим на полноценную форму)
+        async function addTestExpense() {
+            const category = '🍕 Еда';
+            const amount = 350;
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+
+            transactions.unshift({
+                id: Date.now(),
+                type: 'expense',
+                category,
+                amount,
+                date: dateStr,
+                emoji: '🍕'
+            });
+
+            balance -= amount;
+            await saveData();
+            updateUI();
+        }
+
+        // Простая заглушка для дохода
+        async function addTestIncome() {
+            const category = '💼 Зарплата';
+            const amount = 5000;
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+
+            transactions.unshift({
+                id: Date.now(),
+                type: 'income',
+                category,
+                amount,
+                date: dateStr,
+                emoji: '💼'
+            });
+
+            balance += amount;
+            await saveData();
+            updateUI();
+        }
+
+        // Обновление интерфейса
+        function updateUI() {
+            document.getElementById('balanceDisplay').textContent = balance.toLocaleString() + ' ₽';
+            // Дневной лимит можно рассчитать позже
+            const list = document.getElementById('transactionList');
+            list.innerHTML = '';
+            if (transactions.length === 0) {
+                list.innerHTML = '<li class="empty-state">Нет записей</li>';
+                return;
+            }
+            transactions.slice(0, 10).forEach(tx => {
+                const li = document.createElement('li');
+                li.className = 'transaction-item';
+                li.innerHTML = `
+                    <div class="transaction-left">
+                        <span class="transaction-emoji">${tx.emoji}</span>
+                        <div class="transaction-info">
+                            <span class="transaction-category">${tx.category}</span>
+                            <span class="transaction-date">${tx.date}</span>
+                        </div>
                     </div>
+                    <span class="transaction-amount" style="color: ${tx.type === 'income' ? '#34c759' : '#ff3b30'}">
+                        ${tx.type === 'income' ? '+' : '-'}${tx.amount} ₽
+                    </span>
                 `;
+                list.appendChild(li);
             });
         }
-        container.innerHTML = html;
 
-        // Обработчики кликов
-        container.querySelectorAll('.item').forEach(el => {
-            el.addEventListener('click', function(e) {
-                if (e.target.classList.contains('del')) return;
-                const id = this.dataset.id;
-                toggleItem(id);
-            });
-        });
-        container.querySelectorAll('.del').forEach(el => {
-            el.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const id = this.dataset.id;
-                deleteItem(id);
-            });
-        });
-    }
+        // Привязка кнопок
+        document.getElementById('addExpenseBtn').addEventListener('click', addTestExpense);
+        document.getElementById('addIncomeBtn').addEventListener('click', addTestIncome);
 
-    function addItem(text) {
-        const items = loadList();
-        const newItem = {
-            id: Date.now() + Math.random(),
-            text: text.trim(),
-            done: false,
-            category: getCategory(text)
-        };
-        items.push(newItem);
-        saveList(items);
-        render();
-    }
-
-    function toggleItem(id) {
-        const items = loadList();
-        const item = items.find(i => String(i.id) === String(id));
-        if (item) {
-            item.done = !item.done;
-            saveList(items);
-            render();
-        }
-    }
-
-    function deleteItem(id) {
-        let items = loadList();
-        items = items.filter(i => String(i.id) !== String(id));
-        saveList(items);
-        render();
-    }
-
-    function clearDone() {
-        let items = loadList();
-        items = items.filter(i => !i.done);
-        saveList(items);
-        render();
-    }
-
-    function clearAll() {
-        if (confirm('Удалить все продукты?')) {
-            saveList([]);
-            render();
-        }
-    }
-
-    // Добавление через форму
-    document.getElementById('addBtn').addEventListener('click', function() {
-        const input = document.getElementById('productInput');
-        const raw = input.value.trim();
-        if (!raw) return;
-        const parts = raw.split(',').map(s => s.trim()).filter(Boolean);
-        parts.forEach(p => addItem(p));
-        input.value = '';
-    });
-
-    document.getElementById('productInput').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            document.getElementById('addBtn').click();
-        }
-    });
-
-    document.getElementById('clearDoneBtn').addEventListener('click', clearDone);
-    document.getElementById('clearAllBtn').addEventListener('click', clearAll);
-
-    // Первоначальный рендер
-    render();
-</script>
+        // Старт
+        loadData();
+    </script>
 </body>
 </html>
