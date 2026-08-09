@@ -2,54 +2,221 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CookApp</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🍳 CookApp — распознай еду</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; margin: 0; padding: 16px; color: #333; }
-        .card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .balance { font-size: 28px; font-weight: bold; color: #ff9800; }
-        .limit { font-size: 18px; color: #666; }
-        .btn { display: block; width: 100%; padding: 14px; margin: 8px 0; border: none; border-radius: 12px; font-size: 18px; font-weight: 600; background: #4CAF50; color: white; cursor: pointer; transition: 0.2s; text-align: center; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f7f3ee;
+            color: #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 30px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .badge {
+            background: #ffcc00;
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .stars {
+            font-size: 24px;
+            color: #f5b342;
+            margin: 10px 0;
+        }
+        .limit {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 20px;
+        }
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 20px;
+        }
+        .upload-area:hover { border-color: #f5b342; background: #fffbf0; }
+        .upload-area input { display: none; }
+        .upload-area img { max-width: 100%; max-height: 300px; border-radius: 15px; margin-top: 10px; }
+        .btn {
+            background: #f5b342;
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
         .btn:active { transform: scale(0.96); }
-        .btn-secondary { background: #2196F3; }
-        .btn-warning { background: #ff9800; }
-        .btn-danger { background: #f44336; }
-        .btn-outline { background: transparent; color: #333; border: 2px solid #ddd; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .result {
+            margin-top: 25px;
+            background: #faf6f0;
+            border-radius: 20px;
+            padding: 20px;
+            display: none;
+        }
+        .result .product {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .result .recipe {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .recipe h3 { margin-bottom: 5px; }
+        .recipe p { color: #555; line-height: 1.4; }
+        .error { color: #d32f2f; margin-top: 10px; }
+        .footer {
+            margin-top: 30px;
+            font-size: 13px;
+            color: #aaa;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div><div style="font-size:14px;color:#888;">Баланс</div><div class="balance" id="balance">0 ⭐</div></div>
-            <div><div style="font-size:14px;color:#888;">Лимит сегодня</div><div class="limit" id="limit">0 / 3</div></div>
-        </div>
+<div class="container">
+    <h1>🍳 CookApp <span class="badge">Beta</span></h1>
+    <div class="stars" id="starsDisplay">⭐ 0</div>
+    <div class="limit">📸 Сегодня использовано: <span id="usedCount">0</span> / 3</div>
+
+    <div class="upload-area" id="uploadArea">
+        <p>📸 Нажми, чтобы выбрать фото<br><small>или сфотографировать</small></p>
+        <input type="file" accept="image/*" capture="environment" id="photoInput">
+        <img id="preview" style="display:none;" />
     </div>
 
-    <button class="btn" id="fridgeBtn">📸 Фото холодильника</button>
-    <button class="btn btn-secondary" id="cookedBtn">🍳 Готовое блюдо</button>
-    <button class="btn btn-warning" id="buyStarsBtn">⭐ Купить звёзды</button>
-    <button class="btn btn-danger" id="subscribeBtn">📈 Подписка</button>
-    <button class="btn btn-outline" id="historyBtn">📋 Мои рецепты</button>
+    <button class="btn" id="recognizeBtn" disabled>🔍 Распознать</button>
 
-    <div class="card" style="margin-top:20px;font-size:14px;color:#999;text-align:center;">
-        <p>CookApp — готовьте и получайте звёзды!</p>
+    <div class="result" id="resultBox">
+        <div class="product" id="productName">🍅 Помидор</div>
+        <div style="font-size:14px; color:#888;">Уверенность: <span id="confidence">0.95</span></div>
+        <div id="recipesContainer"></div>
     </div>
+    <div id="errorMessage" class="error"></div>
+</div>
+<div class="footer">CookApp — готовьте и получайте звёзды!</div>
 
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
+<script>
+    const photoInput = document.getElementById('photoInput');
+    const preview = document.getElementById('preview');
+    const uploadArea = document.getElementById('uploadArea');
+    const recognizeBtn = document.getElementById('recognizeBtn');
+    const resultBox = document.getElementById('resultBox');
+    const productName = document.getElementById('productName');
+    const confidenceSpan = document.getElementById('confidence');
+    const recipesContainer = document.getElementById('recipesContainer');
+    const errorMsg = document.getElementById('errorMessage');
+    const starsDisplay = document.getElementById('starsDisplay');
+    const usedCount = document.getElementById('usedCount');
 
-        document.getElementById('fridgeBtn').onclick = () => tg.sendData('fridge_photo');
-        document.getElementById('cookedBtn').onclick = () => tg.sendData('cooked_photo');
-        document.getElementById('buyStarsBtn').onclick = () => tg.sendData('buy_stars');
-        document.getElementById('subscribeBtn').onclick = () => tg.sendData('subscribe');
-        document.getElementById('historyBtn').onclick = () => tg.sendData('my_recipes');
+    let currentImageBase64 = null;
 
-        function updateUI(balance, used, limit) {
-            document.getElementById('balance').innerText = balance + ' ⭐';
-            document.getElementById('limit').innerText = used + ' / ' + limit;
+    // Загрузка фото
+    uploadArea.addEventListener('click', () => photoInput.click());
+    photoInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const dataUrl = ev.target.result;
+            preview.src = dataUrl;
+            preview.style.display = 'block';
+            // сохраняем только base64-часть (без data:image/...)
+            currentImageBase64 = dataUrl.split(',')[1];
+            recognizeBtn.disabled = false;
+            errorMsg.textContent = '';
+            resultBox.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Распознавание
+    recognizeBtn.addEventListener('click', async () => {
+        if (!currentImageBase64) return;
+        recognizeBtn.disabled = true;
+        recognizeBtn.textContent = '⏳ Распознаю...';
+        errorMsg.textContent = '';
+        resultBox.style.display = 'none';
+
+        try {
+            const response = await fetch('/recognize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: currentImageBase64 })
+            });
+            const data = await response.json();
+
+            if (response.status === 429) {
+                errorMsg.textContent = '❌ ' + data.error;
+                return;
+            }
+            if (!response.ok) {
+                errorMsg.textContent = '❌ Ошибка: ' + (data.error || 'Неизвестная ошибка');
+                return;
+            }
+
+            // Успех
+            productName.textContent = '🍽 ' + data.product;
+            confidenceSpan.textContent = data.confidence.toFixed(2);
+            starsDisplay.textContent = '⭐ ' + data.stars;
+            usedCount.textContent = data.today_used;
+
+            // Показываем рецепты
+            recipesContainer.innerHTML = '';
+            if (data.recipes.length === 0) {
+                recipesContainer.innerHTML = '<p style="color:#888;">Не найдено подходящих рецептов, но мы работаем над этим!</p>';
+            } else {
+                data.recipes.forEach(r => {
+                    const div = document.createElement('div');
+                    div.className = 'recipe';
+                    div.innerHTML = `<h3>${r.name}</h3><p>${r.instructions}</p>`;
+                    recipesContainer.appendChild(div);
+                });
+            }
+
+            resultBox.style.display = 'block';
+
+        } catch (err) {
+            errorMsg.textContent = '❌ Сетевая ошибка: ' + err.message;
+        } finally {
+            recognizeBtn.disabled = false;
+            recognizeBtn.textContent = '🔍 Распознать';
         }
-    </script>
+    });
+
+    // При загрузке страницы получить текущие звёзды и лимит (можно через отдельный запрос, но пока не нужно)
+    // Для простоты они обновляются после распознавания.
+</script>
 </body>
 </html>
