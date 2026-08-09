@@ -3,75 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🛒 Умный список покупок</title>
+    <title>🛒 Умный список</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, sans-serif; }
-        body { background: #f5f3f0; padding: 20px; display: flex; justify-content: center; }
-        .container { max-width: 600px; width: 100%; background: white; border-radius: 30px; padding: 30px 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-        h1 { font-size: 28px; display: flex; align-items: center; gap: 12px; }
-        .input-row { display: flex; gap: 10px; margin: 20px 0 10px; }
-        .input-row input { flex: 1; padding: 14px 18px; border: 2px solid #ddd; border-radius: 40px; font-size: 16px; outline: none; }
-        .input-row input:focus { border-color: #f5b342; }
-        .input-row button { padding: 14px 24px; background: #f5b342; border: none; border-radius: 40px; font-size: 18px; font-weight: 700; color: white; cursor: pointer; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: #f5f3f0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 30px;
+            padding: 30px 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        h1 {
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0 10px;
+        }
+        .input-row input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #ddd;
+            border-radius: 40px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.2s;
+        }
+        .input-row input:focus {
+            border-color: #f5b342;
+        }
+        .input-row button {
+            padding: 14px 24px;
+            background: #f5b342;
+            border: none;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
         .input-row button:active { transform: scale(0.96); }
-        .hint { font-size: 13px; color: #aaa; margin-bottom: 10px; }
+        .input-row button:disabled { opacity: 0.5; pointer-events: none; }
 
-        .cat-title { font-weight: 700; font-size: 18px; margin: 20px 0 8px 0; color: #555; border-bottom: 2px solid #eee; padding-bottom: 6px; display: flex; justify-content: space-between; }
+        .cat-title {
+            font-weight: 700;
+            font-size: 18px;
+            margin: 20px 0 8px 0;
+            color: #555;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
         .cat-title span { font-weight: 400; font-size: 14px; color: #999; }
 
-        .item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0edea; }
-        .item .name { flex: 1; font-size: 17px; cursor: pointer; transition: 0.2s; }
-        .item .name.done { text-decoration: line-through; color: #aaa; }
-        .item .del { color: #ccc; font-size: 20px; cursor: pointer; padding: 0 8px; visibility: hidden; }
+        .item {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0edea;
+            cursor: pointer;
+        }
+        .item .name {
+            flex: 1;
+            font-size: 17px;
+            transition: 0.2s;
+        }
+        .item .name.done {
+            text-decoration: line-through;
+            color: #aaa;
+        }
+        .item .del {
+            color: #ccc;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 8px;
+            transition: 0.2s;
+            visibility: hidden;
+        }
         .item:hover .del { visibility: visible; }
         .item .del:hover { color: #d32f2f; }
 
-        .footer { display: flex; justify-content: space-between; margin-top: 25px; gap: 10px; }
-        .footer button { background: none; border: none; color: #888; font-size: 14px; cursor: pointer; padding: 8px 16px; border-radius: 30px; background: #f0edea; }
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            gap: 10px;
+        }
+        .footer button {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 30px;
+            background: #f0edea;
+            transition: 0.2s;
+        }
         .footer button:hover { background: #e0dbd5; }
-        .footer .danger { color: #d32f2f; }
+        .footer button.danger { color: #d32f2f; }
 
-        .empty { text-align: center; color: #aaa; padding: 40px 0; font-size: 16px; }
+        .empty {
+            text-align: center;
+            color: #aaa;
+            padding: 40px 0;
+            font-size: 16px;
+        }
+        .hint {
+            font-size: 13px;
+            color: #aaa;
+            margin-top: 4px;
+            margin-bottom: 10px;
+        }
+        a { text-decoration: none; }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>🛒 Умный список</h1>
 
-    <form method="POST" action="/add" class="input-row">
-        <input type="text" name="text" placeholder="Продукт, например: яблоки, молоко" required />
-        <button type="submit">➕</button>
-    </form>
+    <div class="input-row">
+        <input type="text" id="productInput" placeholder="Продукт, например: яблоки, молоко" />
+        <button id="addBtn">➕</button>
+    </div>
     <div class="hint">✏️ Можно добавлять несколько через запятую: <i>яблоки, молоко, хлеб</i></div>
 
     <div id="listContainer">
-        {% if items %}
-            {% set groups = {} %}
-            {% for item in items %}
-                {% set cat = item.category %}
-                {% set _ = groups.update({cat: groups.get(cat, []) + [item]}) %}
-            {% endfor %}
-
-            {% for cat, items_in_cat in groups.items() %}
-                {% set emoji = {'овощи':'🥬','фрукты':'🍎','мясо':'🥩','рыба':'🐟','молочное':'🧀','хлеб':'🍞','бакалея':'🍚','напитки':'🥤','прочее':'📦'}.get(cat, '📦') %}
-                {% set done_count = items_in_cat|selectattr('done')|list|length %}
-                <div class="cat-title">{{ emoji }} {{ cat|capitalize }} <span>{{ done_count }}/{{ items_in_cat|length }}</span></div>
-                {% for item in items_in_cat %}
-                    <div class="item">
-                        <span class="name {{ 'done' if item.done }}" onclick="location.href='/toggle/{{ item.id }}'">{{ item.text }}</span>
-                        <span class="del" onclick="if(confirm('Удалить?')) location.href='/delete/{{ item.id }}'">✕</span>
-                    </div>
-                {% endfor %}
-            {% endfor %}
-        {% else %}
-            <div class="empty">Список пуст. Добавьте продукты!</div>
-        {% endif %}
+        <div class="empty">Список пуст. Добавьте продукты!</div>
     </div>
 
     <div class="footer">
-        <a href="/clear_done"><button>✅ Убрать купленные</button></a>
-        <a href="/clear_all"><button class="danger">🗑️ Очистить всё</button></a>
+        <button id="clearDoneBtn">✅ Убрать купленные</button>
+        <button id="clearAllBtn" class="danger">🗑️ Очистить всё</button>
     </div>
 </div>
+
+<script>
+    // ----- Хранилище в localStorage -----
+    const STORAGE_KEY = 'smart_shopping_list';
+
+    // Категории (для группировки)
+    const CATEGORIES = {
+        'овощи': ['помидор', 'огурец', 'морковь', 'капуста', 'лук', 'чеснок', 'перец', 'баклажан', 'кабачок', 'свекла', 'картофель'],
+        'фрукты': ['яблоко', 'банан', 'апельсин', 'лимон', 'груша', 'виноград', 'клубника', 'арбуз', 'дыня', 'персик'],
+        'мясо': ['говядина', 'свинина', 'курица', 'индейка', 'баранина', 'фарш', 'колбаса', 'сосиски'],
+        'рыба': ['лосось', 'треска', 'сельдь', 'скумбрия', 'карп', 'форель', 'креветка'],
+        'молочное': ['молоко', 'кефир', 'йогурт', 'творог', 'сыр', 'сметана', 'сливки', 'масло', 'ряженка'],
+        'хлеб': ['хлеб', 'батон', 'булка', 'лаваш', 'кекс', 'печенье'],
+        'бакалея': ['рис', 'гречка', 'макароны', 'мука', 'сахар', 'соль', 'масло', 'крупа', 'овсянка', 'горох', 'чечевица'],
+        'напитки': ['вода', 'сок', 'компот', 'чай', 'кофе', 'лимонад'],
+        'прочее': []
+    };
+
+    function getCategory(product) {
+        const lower = product.toLowerCase();
+        for (const [cat, keywords] of Object.entries(CATEGORIES)) {
+            for (const kw of keywords) {
+                if (lower.includes(kw)) return cat;
+            }
+        }
+        return 'прочее';
+    }
+
+    // Загружаем список
+    function loadList() {
+        try {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        } catch { return []; }
+    }
+
+    function saveList(items) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function render() {
+        const container = document.getElementById('listContainer');
+        const items = loadList();
+        if (items.length === 0) {
+            container.innerHTML = '<div class="empty">Список пуст. Добавьте продукты!</div>';
+            return;
+        }
+
+        // Группировка по категории
+        const groups = {};
+        items.forEach(item => {
+            const cat = item.category || 'прочее';
+            if (!groups[cat]) groups[cat] = [];
+            groups[cat].push(item);
+        });
+
+        let html = '';
+        const emojiMap = {
+            'овощи': '🥬', 'фрукты': '🍎', 'мясо': '🥩', 'рыба': '🐟',
+            'молочное': '🧀', 'хлеб': '🍞', 'бакалея': '🍚', 'напитки': '🥤', 'прочее': '📦'
+        };
+        for (const [cat, itemsInCat] of Object.entries(groups)) {
+            const emoji = emojiMap[cat] || '📦';
+            const doneCount = itemsInCat.filter(i => i.done).length;
+            const total = itemsInCat.length;
+            html += `<div class="cat-title">${emoji} ${cat.charAt(0).toUpperCase()+cat.slice(1)} <span>${doneCount}/${total}</span></div>`;
+            itemsInCat.forEach(item => {
+                const doneClass = item.done ? 'done' : '';
+                html += `
+                    <div class="item" data-id="${item.id}">
+                        <span class="name ${doneClass}">${item.text}</span>
+                        <span class="del" data-id="${item.id}">✕</span>
+                    </div>
+                `;
+            });
+        }
+        container.innerHTML = html;
+
+        // Обработчики кликов
+        container.querySelectorAll('.item').forEach(el => {
+            el.addEventListener('click', function(e) {
+                if (e.target.classList.contains('del')) return;
+                const id = this.dataset.id;
+                toggleItem(id);
+            });
+        });
+        container.querySelectorAll('.del').forEach(el => {
+            el.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const id = this.dataset.id;
+                deleteItem(id);
+            });
+        });
+    }
+
+    function addItem(text) {
+        const items = loadList();
+        const newItem = {
+            id: Date.now() + Math.random(),
+            text: text.trim(),
+            done: false,
+            category: getCategory(text)
+        };
+        items.push(newItem);
+        saveList(items);
+        render();
+    }
+
+    function toggleItem(id) {
+        const items = loadList();
+        const item = items.find(i => String(i.id) === String(id));
+        if (item) {
+            item.done = !item.done;
+            saveList(items);
+            render();
+        }
+    }
+
+    function deleteItem(id) {
+        let items = loadList();
+        items = items.filter(i => String(i.id) !== String(id));
+        saveList(items);
+        render();
+    }
+
+    function clearDone() {
+        let items = loadList();
+        items = items.filter(i => !i.done);
+        saveList(items);
+        render();
+    }
+
+    function clearAll() {
+        if (confirm('Удалить все продукты?')) {
+            saveList([]);
+            render();
+        }
+    }
+
+    // Добавление через форму
+    document.getElementById('addBtn').addEventListener('click', function() {
+        const input = document.getElementById('productInput');
+        const raw = input.value.trim();
+        if (!raw) return;
+        const parts = raw.split(',').map(s => s.trim()).filter(Boolean);
+        parts.forEach(p => addItem(p));
+        input.value = '';
+    });
+
+    document.getElementById('productInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('addBtn').click();
+        }
+    });
+
+    document.getElementById('clearDoneBtn').addEventListener('click', clearDone);
+    document.getElementById('clearAllBtn').addEventListener('click', clearAll);
+
+    // Первоначальный рендер
+    render();
+</script>
 </body>
 </html>
